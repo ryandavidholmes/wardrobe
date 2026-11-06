@@ -27,7 +27,7 @@
   .hl,.hr{display:flex;gap:24px;align-items:center;text-transform:uppercase;font-size:11px;letter-spacing:.04em}
   .hr{justify-content:flex-end}
   .hl a.on,.hr a.on{text-decoration:underline;text-underline-offset:4px}
-  .logo img{height:44px;display:block}
+  .logo img{height:66px;display:block}
   #search{border:0;border-bottom:1px solid var(--ink);border-radius:0;font-size:11px;letter-spacing:.04em;text-transform:uppercase;width:150px;padding:4px 0;outline:none;background:transparent}
   #search::placeholder{color:var(--ink)}
   .menu{display:none;background:none;border:0;padding:0;text-transform:uppercase;font-size:11px;letter-spacing:.04em}
@@ -36,7 +36,7 @@
   .shell{display:grid;grid-template-columns:200px minmax(0,1fr);gap:40px;padding:20px 28px 100px;max-width:1680px;margin:0 auto}
   .shell.full{grid-template-columns:minmax(0,1fr)}
   .shell.full aside{display:none}
-  aside{position:sticky;top:84px;align-self:start;max-height:calc(100vh - 104px);overflow-y:auto;scrollbar-width:none;padding-bottom:20px}
+  aside{position:sticky;top:106px;align-self:start;max-height:calc(100vh - 126px);overflow-y:auto;scrollbar-width:none;padding-bottom:20px}
   aside::-webkit-scrollbar{display:none}
   .grp{margin-bottom:30px}
   .grp h4{margin:0 0 10px;font-weight:400}
@@ -74,7 +74,7 @@
   .pdp{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(280px,1fr);gap:56px;max-width:1320px}
   .pdp .im{background:var(--soft)}
   .pdp .im img{width:100%;display:block}
-  .info{position:sticky;top:92px;align-self:start;max-width:380px}
+  .info{position:sticky;top:114px;align-self:start;max-width:380px}
   .info .brand{font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.02em}
   .info .nm{font-size:14px;margin:3px 0 26px}
   .rows{border-bottom:1px solid var(--line);margin-bottom:22px}
@@ -142,7 +142,7 @@
   /* mobile */
   @media(max-width:800px){
     header.top{padding:calc(env(safe-area-inset-top) + 12px) 16px 12px;grid-template-columns:1fr auto 1fr}
-    .logo img{height:32px}
+    .logo img{height:48px}
     .menu{display:block}
     .hl a,#search,.hr a[data-nav="more"]{display:none}
     .shell,.shell.full{grid-template-columns:minmax(0,1fr);padding:8px 16px 90px;gap:0}
