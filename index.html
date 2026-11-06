@@ -42,7 +42,7 @@
   aside{position:sticky;top:84px;align-self:start;max-height:calc(100vh - 104px);overflow-y:auto;scrollbar-width:none;padding-bottom:20px}
   aside::-webkit-scrollbar{display:none}
   .grp{margin-bottom:30px}
-  .grp h4{margin:0 0 10px;font-weight:400}
+  .grp h4{margin:0 0 10px;font-weight:700}
   aside a{display:block;padding:1px 0;font-size:13px;line-height:1.25}
   .cats a{text-transform:uppercase;font-size:12px;letter-spacing:.02em}
   .cats .n{letter-spacing:0}
@@ -325,13 +325,11 @@ function sidebar(cat, sub) {
     </div>
     <div class="grp">
       <h4 class="up">Designers ${S.brand ? `&nbsp;<button class="link" id="clearBrand">Clear</button>` : ''}</h4>
-      <input class="bf" id="bf" placeholder="Search designers" autocomplete="off">
       <div id="brands">${brands.map(b => `<a href="javascript:void 0" data-brand="${esc(b)}" class="${b === S.brand ? 'on' : ''}">${esc(b)}</a>`).join('') || '<span class="muted">None</span>'}</div>
     </div>
     <div class="grp" style="border-top:1px solid var(--line);padding-top:16px">
       <a href="#/outfits">Outfits</a><a href="#/add">Add a piece</a><a href="#/more">Backup &amp; settings</a>
     </div>`;
-  $('#bf').oninput = e => { const q = e.target.value.toLowerCase(); document.querySelectorAll('#brands [data-brand]').forEach(a => a.style.display = a.dataset.brand.toLowerCase().includes(q) ? '' : 'none'); };
   $('#brands').onclick = e => {
     const a = e.target.closest('[data-brand]'); if (!a) return; e.preventDefault();
     S.brand = S.brand === a.dataset.brand ? null : a.dataset.brand;
