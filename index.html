@@ -43,10 +43,12 @@
   aside::-webkit-scrollbar{display:none}
   .grp{margin-bottom:30px}
   .grp h4{margin:0 0 10px;font-weight:400}
-  aside a{display:block;padding:2.5px 0;font-size:13px}
+  aside a{display:block;padding:1px 0;font-size:13px;line-height:1.25}
+  .cats a{text-transform:uppercase;font-size:12px;letter-spacing:.02em}
+  .cats .n{letter-spacing:0}
   aside a:hover{text-decoration:underline;text-underline-offset:3px}
   aside a.on{font-weight:700}
-  aside .subs{margin:2px 0 6px}
+  aside .subs{margin:1px 0 4px}
   aside .subs a{padding-left:14px}
   aside .n{color:var(--muted);font-size:12px;margin-left:5px;font-weight:400}
   .bf{width:100%;border:0;border-bottom:1px solid var(--line);border-radius:0;padding:5px 0;margin-bottom:8px;outline:none;font-size:13px}
@@ -155,7 +157,8 @@
     .shell aside,.shell.full aside{display:block;position:fixed;top:0;left:0;bottom:0;width:82vw;max-width:330px;max-height:none;z-index:40;background:#fff;padding:calc(env(safe-area-inset-top) + 22px) 22px 40px;transform:translateX(-102%);transition:transform .25s}
     body.drawer aside{transform:none}
     body.drawer .scrim{opacity:1;pointer-events:auto}
-    aside a{font-size:15px;padding:5px 0}
+    aside a{font-size:15px;padding:3px 0}
+    .cats a{font-size:14px}
     .msearch{display:block;width:100%;border:0;border-bottom:1px solid var(--ink);border-radius:0;padding:10px 0;font-size:16px;outline:none;margin-bottom:18px}
     .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:30px 12px}
     .pdp{grid-template-columns:1fr;gap:22px}
@@ -313,7 +316,7 @@ function sidebar(cat, sub) {
   const brands = [...new Set(filtered(cat, sub, false).map(i => i.brand).filter(Boolean))].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
   const catHref = c => `#/c/${enc(c)}`;
   $('#side').innerHTML = `
-    <div class="grp">
+    <div class="grp cats">
       <h4 class="up">Categories</h4>
       <a href="#/" class="${!cat ? 'on' : ''}">All<span class="n">${all.length}</span></a>
       ${[...t.keys()].filter(c => count(c)).map(c => `
