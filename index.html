@@ -260,9 +260,10 @@ function tree() {
   }
   return t;
 }
+const abc = (a, b) => (a.brand || '').localeCompare(b.brand || '', undefined, { sensitivity: 'base' }) || (a.name || '').localeCompare(b.name || '', undefined, { sensitivity: 'base', numeric: true }) || a.order - b.order;
 function defaultSorter() {
   const t = tree(), cats = [...t.keys()];
-  return (a, b) => (cats.indexOf(a.cat) - cats.indexOf(b.cat)) || (t.get(a.cat).indexOf(a.sub) - t.get(b.cat).indexOf(b.sub)) || (a.order - b.order);
+  return (a, b) => (cats.indexOf(a.cat) - cats.indexOf(b.cat)) || (t.get(a.cat).indexOf(a.sub) - t.get(b.cat).indexOf(b.sub)) || abc(a, b);
 }
 const img = (it, cls = '') => it && it.photo ? `<img class="${cls}" src="${it.photo}" alt="${esc(it.brand + ' ' + it.name)}" loading="lazy">` : `<div class="ph-blank">No photo</div>`;
 const label = it => esc(it.name || it.sub || it.cat);
@@ -365,7 +366,7 @@ function closet(cat, sub) {
 function renderGrid(cat, sub) {
   const list = filtered(cat, sub);
   const s = S.sort;
-  list.sort(s === 'brand' ? (a, b) => (a.brand || '').localeCompare(b.brand || '', undefined, { sensitivity: 'base' }) || a.order - b.order
+  list.sort(s === 'brand' ? abc
     : s === 'high' ? (a, b) => (b.price || 0) - (a.price || 0) || a.order - b.order
     : s === 'low' ? (a, b) => (a.price ?? 1e9) - (b.price ?? 1e9) || a.order - b.order
     : s === 'most' ? (a, b) => b.wears - a.wears || a.order - b.order
