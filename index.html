@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Wardrobe</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Wardrobe">
+<meta name="theme-color" content="#ffffff">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="icon" href="icon.png">
+<style>
+  :root{ --ink:#000; --muted:#767676; --line:#e5e5e5; --soft:#f4f4f4; --bg:#fff; }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;background:var(--bg);color:var(--ink)}
+  body{font:13px/1.45 "Helvetica Neue",Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  button,input,select,textarea{font:inherit;color:inherit}
+  button{cursor:pointer}
+  .up{text-transform:uppercase;font-size:11px;letter-spacing:.04em}
+  .muted{color:var(--muted)}
+
+  /* header */
+  header.top{position:sticky;top:0;z-index:30;background:rgba(255,255,255,.97);display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:16px;padding:calc(env(safe-area-inset-top) + 16px) 28px 16px}
+  .hl,.hr{display:flex;gap:24px;align-items:center;text-transform:uppercase;font-size:11px;letter-spacing:.04em}
+  .hr{justify-content:flex-end}
+  .hl a.on,.hr a.on{text-decoration:underline;text-underline-offset:4px}
+  .logo img{height:44px;display:block}
+  #search{border:0;border-bottom:1px solid var(--ink);border-radius:0;font-size:11px;letter-spacing:.04em;text-transform:uppercase;width:150px;padding:4px 0;outline:none;background:transparent}
+  #search::placeholder{color:var(--ink)}
+  .menu{display:none;background:none;border:0;padding:0;text-transform:uppercase;font-size:11px;letter-spacing:.04em}
+
+  /* layout */
+  .shell{display:grid;grid-template-columns:200px minmax(0,1fr);gap:40px;padding:20px 28px 100px;max-width:1680px;margin:0 auto}
+  .shell.full{grid-template-columns:minmax(0,1fr)}
+  .shell.full aside{display:none}
+  aside{position:sticky;top:84px;align-self:start;max-height:calc(100vh - 104px);overflow-y:auto;scrollbar-width:none;padding-bottom:20px}
+  aside::-webkit-scrollbar{display:none}
+  .grp{margin-bottom:30px}
+  .grp h4{margin:0 0 10px;font-weight:400}
+  aside a{display:block;padding:2.5px 0;font-size:13px}
+  aside a:hover{text-decoration:underline;text-underline-offset:3px}
+  aside a.on{font-weight:700}
+  aside .subs{margin:2px 0 6px}
+  aside .subs a{padding-left:14px}
+  aside .n{color:var(--muted);font-size:11px;margin-left:5px;font-weight:400}
+  .bf{width:100%;border:0;border-bottom:1px solid var(--line);border-radius:0;padding:5px 0;margin-bottom:8px;outline:none;font-size:13px}
+  .bf:focus{border-color:var(--ink)}
+  .clear{font-size:11px;text-transform:uppercase;letter-spacing:.04em;text-decoration:underline;color:var(--muted)}
+
+  /* closet */
+  .chead{display:flex;justify-content:space-between;align-items:baseline;gap:16px;margin-bottom:24px}
+  .crumb{text-transform:uppercase;font-size:11px;letter-spacing:.04em}
+  .crumb a:hover{text-decoration:underline}
+  .sort{appearance:none;-webkit-appearance:none;border:0;background:transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='5'%3E%3Cpath d='M.5.5l4 4 4-4' fill='none' stroke='%23000'/%3E%3C/svg%3E") no-repeat right center;padding:0 16px 0 0;text-transform:uppercase;font-size:11px;letter-spacing:.04em;cursor:pointer;outline:none}
+  .msearch{display:none}
+  .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:48px 20px}
+  @media(max-width:1180px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+  .card{display:block;cursor:pointer}
+  .card .im{aspect-ratio:6/5;background:var(--soft);overflow:hidden;position:relative}
+  .card .im img{width:100%;height:100%;object-fit:cover;display:block;transition:opacity .2s}
+  .card:hover .im img{opacity:.82}
+  .card .b{margin-top:11px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .card .nm{font-size:12px;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .card .mt{font-size:12px;color:var(--muted);margin-top:1px}
+  .ph-blank{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:11px;text-transform:uppercase;color:var(--muted)}
+  .empty{padding:80px 0;text-align:center;color:var(--muted)}
+
+  /* product page */
+  .back{display:inline-block;margin-bottom:22px}
+  .back:hover{text-decoration:underline}
+  .pdp{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(280px,1fr);gap:56px;max-width:1320px}
+  .pdp .im{background:var(--soft)}
+  .pdp .im img{width:100%;display:block}
+  .info{position:sticky;top:92px;align-self:start;max-width:380px}
+  .info .brand{font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.02em}
+  .info .nm{font-size:14px;margin:3px 0 26px}
+  .rows{border-bottom:1px solid var(--line);margin-bottom:22px}
+  .rw{display:flex;justify-content:space-between;gap:16px;border-top:1px solid var(--line);padding:11px 0;font-size:12px}
+  .rw span:first-child{text-transform:uppercase;font-size:11px;letter-spacing:.04em;color:var(--muted)}
+  .notes{white-space:pre-wrap;font-size:13px;margin:0 0 22px}
+  .btn{display:block;width:100%;background:var(--ink);color:#fff;border:1px solid var(--ink);border-radius:0;padding:15px 16px;text-transform:uppercase;font-size:11px;letter-spacing:.08em;text-align:center}
+  .btn.alt{background:#fff;color:var(--ink)}
+  .btn:disabled{opacity:.4;cursor:default}
+  .stack{display:grid;gap:10px}
+  .link{background:none;border:0;padding:0;text-transform:uppercase;font-size:11px;letter-spacing:.04em;text-decoration:underline;text-underline-offset:3px;color:var(--muted)}
+  .link.ink{color:var(--ink)}
+  .minis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
+  .minis img{width:100%;aspect-ratio:1;object-fit:cover;display:block;background:var(--soft)}
+
+  /* forms */
+  .form{max-width:560px}
+  .form h1,.ptitle{font-size:11px;font-weight:400;text-transform:uppercase;letter-spacing:.04em;margin:0 0 26px}
+  .fld{margin-bottom:22px}
+  .fld label{display:block;text-transform:uppercase;font-size:11px;letter-spacing:.04em;margin-bottom:7px}
+  .inp{width:100%;border:1px solid #cfcfcf;border-radius:0;padding:12px;font-size:16px;outline:none;background:#fff}
+  .inp:focus{border-color:var(--ink)}
+  textarea.inp{min-height:80px;resize:vertical}
+  select.inp{appearance:none;-webkit-appearance:none;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='5'%3E%3Cpath d='M.5.5l4 4 4-4' fill='none' stroke='%23000'/%3E%3C/svg%3E") no-repeat right 14px center}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .photo{display:block;aspect-ratio:6/5;background:var(--soft);cursor:pointer;position:relative;overflow:hidden}
+  .photo img{width:100%;height:100%;object-fit:cover;display:block}
+  .photo .hint{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-transform:uppercase;font-size:11px;letter-spacing:.04em}
+  .photo .chg{position:absolute;right:10px;bottom:10px;background:#fff;padding:6px 9px}
+
+  /* outfits */
+  .bar{display:flex;justify-content:space-between;align-items:baseline;gap:16px;margin-bottom:24px}
+  .bar .acts{display:flex;gap:22px}
+  .collage{aspect-ratio:6/5;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:2px;background:#fff}
+  .collage img,.collage i{width:100%;height:100%;object-fit:cover;display:block;background:var(--soft)}
+  .collage.n1{grid-template-columns:1fr;grid-template-rows:1fr}
+  .collage.n2{grid-template-rows:1fr}
+  .collage.n3 > :first-child{grid-row:span 2}
+  .chips{display:flex;gap:18px;flex-wrap:wrap;margin:6px 0 18px}
+  .chips button{background:none;border:0;padding:0;text-transform:uppercase;font-size:11px;letter-spacing:.04em;color:var(--muted)}
+  .chips button.on{color:var(--ink);text-decoration:underline;text-underline-offset:4px}
+  .pick{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:22px 12px}
+  @media(max-width:1180px){.pick{grid-template-columns:repeat(4,minmax(0,1fr))}}
+  .pick .card .b,.pick .card .nm{font-size:11px}
+  .pick .card.sel .im{outline:2px solid var(--ink);outline-offset:-2px}
+  .pick .tick{position:absolute;top:6px;right:6px;width:20px;height:20px;background:#fff;border:1px solid var(--ink);display:flex;align-items:center;justify-content:center;font-size:12px}
+  .pick .card.sel .tick{background:var(--ink);color:#fff}
+  .savebar{position:sticky;bottom:0;background:#fff;border-top:1px solid var(--line);padding:14px 0 calc(14px + env(safe-area-inset-bottom));margin-top:30px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .savebar .btn{width:auto;min-width:200px}
+
+  /* more */
+  .panel{border-top:1px solid var(--line);padding:22px 0;max-width:620px}
+  .panel h3{margin:0 0 6px;text-transform:uppercase;font-size:11px;letter-spacing:.04em;font-weight:700}
+  .panel p{margin:0 0 14px;color:var(--muted)}
+  .panel .btn{width:auto;display:inline-block;min-width:210px;margin:0 8px 8px 0}
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);max-width:620px;margin-bottom:26px}
+  .stats div{padding:14px 0}
+  .stats b{display:block;font-size:26px;font-weight:400;line-height:1.1}
+  .stats span{text-transform:uppercase;font-size:11px;letter-spacing:.04em;color:var(--muted)}
+
+  .toast{position:fixed;left:50%;bottom:calc(28px + env(safe-area-inset-bottom));transform:translate(-50%,8px);background:var(--ink);color:#fff;padding:11px 18px;text-transform:uppercase;font-size:11px;letter-spacing:.06em;opacity:0;transition:.2s;z-index:80;pointer-events:none;white-space:nowrap}
+  .toast.show{opacity:1;transform:translate(-50%,0)}
+  .scrim{position:fixed;inset:0;background:rgba(0,0,0,.25);z-index:39;opacity:0;pointer-events:none;transition:opacity .2s}
+
+  /* mobile */
+  @media(max-width:800px){
+    header.top{padding:calc(env(safe-area-inset-top) + 12px) 16px 12px;grid-template-columns:1fr auto 1fr}
+    .logo img{height:32px}
+    .menu{display:block}
+    .hl a,#search,.hr a[data-nav="more"]{display:none}
+    .shell,.shell.full{grid-template-columns:minmax(0,1fr);padding:8px 16px 90px;gap:0}
+    .shell aside,.shell.full aside{display:block;position:fixed;top:0;left:0;bottom:0;width:82vw;max-width:330px;max-height:none;z-index:40;background:#fff;padding:calc(env(safe-area-inset-top) + 22px) 22px 40px;transform:translateX(-102%);transition:transform .25s}
+    body.drawer aside{transform:none}
+    body.drawer .scrim{opacity:1;pointer-events:auto}
+    aside a{font-size:15px;padding:5px 0}
+    .msearch{display:block;width:100%;border:0;border-bottom:1px solid var(--ink);border-radius:0;padding:10px 0;font-size:16px;outline:none;margin-bottom:18px}
+    .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:30px 12px}
+    .pdp{grid-template-columns:1fr;gap:22px}
+    .info{position:static;max-width:none}
+    .pick{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px 8px}
+    .savebar .btn{min-width:150px}
+    .stats b{font-size:22px}
+  }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="hl">
+    <button class="menu" id="menuBtn">Menu</button>
+    <a href="#/" data-nav="closet">Closet</a>
+    <a href="#/outfits" data-nav="outfits">Outfits</a>
+  </div>
+  <a class="logo" href="#/" aria-label="Wardrobe home"><img src="logo.png" alt="Wardrobe"></a>
+  <div class="hr">
+    <input id="search" type="search" placeholder="Search" autocomplete="off">
+    <a href="#/add" data-nav="add">Add</a>
+    <a href="#/more" data-nav="more">More</a>
+  </div>
+</header>
+<div class="shell" id="shell"><aside id="side"></aside><main id="view"></main></div>
+<div class="scrim" id="scrim"></div>
+<div class="toast" id="toast"></div>
+
+<script src="catalog.js"></script>
+<script>
+const CATS = ['Accessories', 'Outerwear', 'Tops', 'Bottoms', 'Footwear'];
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+const uid = () => 'u' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+const today = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
+const enc = s => encodeURIComponent(s);
+function ago(day) {
+  if (!day) return 'Never';
+  const diff = Math.round((new Date(today() + 'T00:00') - new Date(day + 'T00:00')) / 864e5);
+  if (diff <= 0) return 'Today';
+  if (diff === 1) return 'Yesterday';
+  if (diff < 30) return diff + ' days ago';
+  return new Date(day + 'T00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+}
+function toast(m) { const t = $('#toast'); t.textContent = m; t.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('show'), 1800); }
+function resizeImage(file, max = 1200) {
+  return new Promise((res, rej) => {
+    const url = URL.createObjectURL(file), img = new Image();
+    img.onload = () => {
+      const s = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+      const c = document.createElement('canvas'); c.width = Math.round(img.naturalWidth * s); c.height = Math.round(img.naturalHeight * s);
+      const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height); x.drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url); res(c.toDataURL('image/jpeg', 0.84));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); rej(new Error('Could not read that image')); };
+    img.src = url;
+  });
+}
+
+/* ---------- storage: your changes live on this device ---------- */
+const DB = {
+  db: null,
+  open() { return new Promise((res, rej) => { const r = indexedDB.open('wardrobe-v2', 1);
+    r.onupgradeneeded = () => { const d = r.result; d.createObjectStore('items', { keyPath: 'id' }); d.createObjectStore('outfits', { keyPath: 'id' }); };
+    r.onsuccess = () => { this.db = r.result; res(); }; r.onerror = () => rej(r.error); }); },
+  all(s) { return new Promise((res, rej) => { const q = this.db.transaction(s).objectStore(s).getAll(); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); }); },
+  tx(s, fn) { return new Promise((res, rej) => { const t = this.db.transaction(s, 'readwrite'); fn(t.objectStore(s)); t.oncomplete = res; t.onerror = () => rej(t.error); }); },
+  put(s, v) { return this.tx(s, st => st.put(v)); },
+  del(s, id) { return this.tx(s, st => st.delete(id)); },
+  clear(s) { return this.tx(s, st => st.clear()); }
+};
+
+const S = { items: [], outfits: [], brand: null, q: '', sort: 'default', scroll: 0, last: '', preset: null, shuffle: null, pickCat: 'All' };
+const BASE = new Map((window.CATALOG || []).map((c, i) => [c.id, { notes: '', wears: 0, lastWorn: null, prevWorn: null, ...c, order: i }]));
+const item = id => S.items.find(i => i.id === id);
+
+async function load() {
+  const local = await DB.all('items');
+  const byId = new Map(local.map(r => [r.id, r]));
+  const out = [];
+  for (const [id, b] of BASE) { const l = byId.get(id); const it = l ? { ...b, ...l, custom: false } : { ...b }; if (!it.deleted) out.push(it); }
+  for (const l of local) if (!BASE.has(l.id) && !l.deleted) out.push({ qty: 1, size: '', notes: '', wears: 0, lastWorn: null, order: 1e6 + (l.created || 0), ...l, custom: true });
+  S.items = out;
+  S.outfits = await DB.all('outfits');
+}
+async function saveItem(it) {
+  await DB.put('items', { ...it });
+  const k = S.items.findIndex(x => x.id === it.id);
+  if (it.deleted) { if (k >= 0) S.items.splice(k, 1); }
+  else if (k >= 0) S.items[k] = it; else S.items.push(it);
+}
+
+/* ---------- categories ---------- */
+function tree() {
+  const t = new Map(CATS.map(c => [c, []]));
+  for (const it of [...S.items].sort((a, b) => a.order - b.order)) {
+    if (!t.has(it.cat)) t.set(it.cat, []);
+    if (it.sub && !t.get(it.cat).includes(it.sub)) t.get(it.cat).push(it.sub);
+  }
+  return t;
+}
+function defaultSorter() {
+  const t = tree(), cats = [...t.keys()];
+  return (a, b) => (cats.indexOf(a.cat) - cats.indexOf(b.cat)) || (t.get(a.cat).indexOf(a.sub) - t.get(b.cat).indexOf(b.sub)) || (a.order - b.order);
+}
+const img = (it, cls = '') => it && it.photo ? `<img class="${cls}" src="${it.photo}" alt="${esc(it.brand + ' ' + it.name)}" loading="lazy">` : `<div class="ph-blank">No photo</div>`;
+const label = it => esc(it.name || it.sub || it.cat);
+function card(it, extra = '') {
+  const meta = [it.size && `Size ${esc(it.size)}`, it.qty > 1 && `×${it.qty}`, it.wears ? `Worn ${it.wears}×` : null].filter(Boolean).join(' · ');
+  return `<a class="card" href="#/item/${it.id}" data-id="${it.id}"><div class="im">${img(it)}${extra}</div>
+    <div class="b">${esc(it.brand || '—')}</div><div class="nm">${label(it)}</div>${meta ? `<div class="mt">${meta}</div>` : ''}</a>`;
+}
+
+/* ---------- router ---------- */
+function go(h) { location.hash = h; }
+function route() {
+  const p = location.hash.replace(/^#\/?/, '').split('/').filter(Boolean).map(decodeURIComponent);
+  const v = p[0] || 'c';
+  if (S.last === 'c') S.scroll = window.scrollY;
+  const from = S.last; S.last = v;
+  document.body.classList.remove('drawer');
+  document.querySelectorAll('[data-nav]').forEach(a => a.classList.toggle('on',
+    a.dataset.nav === (v === 'c' ? 'closet' : ['outfits','outfit','outfit-new','outfit-edit','shuffle'].includes(v) ? 'outfits' : v)));
+  $('#shell').classList.toggle('full', v !== 'c');
+  if (v === 'c') { closet(p[1], p[2]); window.scrollTo(0, from === 'item' ? S.scroll : 0); return; }
+  window.scrollTo(0, 0);
+  if (v === 'item') itemPage(p[1]);
+  else if (v === 'add') editPage();
+  else if (v === 'edit') editPage(p[1]);
+  else if (v === 'outfits') outfitsPage();
+  else if (v === 'outfit') outfitPage(p[1]);
+  else if (v === 'outfit-new') outfitEditor();
+  else if (v === 'outfit-edit') outfitEditor(p[1]);
+  else if (v === 'shuffle') shufflePage();
+  else if (v === 'more') morePage();
+  else go('#/');
+  sidebar(null, null);
+}
+window.addEventListener('hashchange', route);
+$('#menuBtn').onclick = () => document.body.classList.add('drawer');
+$('#scrim').onclick = () => document.body.classList.remove('drawer');
+
+/* ---------- closet ---------- */
+function filtered(cat, sub, withBrand = true) {
+  const q = S.q.trim().toLowerCase();
+  return S.items.filter(i => (!cat || i.cat === cat) && (!sub || i.sub === sub) &&
+    (!withBrand || !S.brand || i.brand === S.brand) &&
+    (!q || [i.brand, i.name, i.sub, i.cat, i.notes, i.size].join(' ').toLowerCase().includes(q)));
+}
+function sidebar(cat, sub) {
+  const t = tree(), all = S.items;
+  const count = (c, s) => all.filter(i => i.cat === c && (!s || i.sub === s)).length;
+  const brands = [...new Set(filtered(cat, sub, false).map(i => i.brand).filter(Boolean))].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+  const catHref = c => `#/c/${enc(c)}`;
+  $('#side').innerHTML = `
+    <div class="grp">
+      <h4 class="up">Categories</h4>
+      <a href="#/" class="${!cat ? 'on' : ''}">All<span class="n">${all.length}</span></a>
+      ${[...t.keys()].filter(c => count(c)).map(c => `
+        <a href="${catHref(c)}" class="${c === cat && !sub ? 'on' : ''}">${esc(c)}<span class="n">${count(c)}</span></a>
+        ${c === cat ? `<div class="subs">${t.get(c).filter(s => count(c, s)).map(s => `<a href="${catHref(c)}/${enc(s)}" class="${s === sub ? 'on' : ''}">${esc(s)}<span class="n">${count(c, s)}</span></a>`).join('')}</div>` : ''}`).join('')}
+    </div>
+    <div class="grp">
+      <h4 class="up">Designers ${S.brand ? `&nbsp;<button class="link" id="clearBrand">Clear</button>` : ''}</h4>
+      <input class="bf" id="bf" placeholder="Search designers" autocomplete="off">
+      <div id="brands">${brands.map(b => `<a href="javascript:void 0" data-brand="${esc(b)}" class="${b === S.brand ? 'on' : ''}">${esc(b)}</a>`).join('') || '<span class="muted">None</span>'}</div>
+    </div>
+    <div class="grp" style="border-top:1px solid var(--line);padding-top:16px">
+      <a href="#/outfits">Outfits</a><a href="#/add">Add a piece</a><a href="#/more">Backup &amp; settings</a>
+    </div>`;
+  $('#bf').oninput = e => { const q = e.target.value.toLowerCase(); document.querySelectorAll('#brands [data-brand]').forEach(a => a.style.display = a.dataset.brand.toLowerCase().includes(q) ? '' : 'none'); };
+  $('#brands').onclick = e => {
+    const a = e.target.closest('[data-brand]'); if (!a) return; e.preventDefault();
+    S.brand = S.brand === a.dataset.brand ? null : a.dataset.brand;
+    document.body.classList.remove('drawer');
+    if (S.last !== 'c') go('#/'); else { sidebar(cat, sub); renderGrid(cat, sub); }
+  };
+  if ($('#clearBrand')) $('#clearBrand').onclick = () => { S.brand = null; if (S.last === 'c') { sidebar(cat, sub); renderGrid(cat, sub); } };
+}
+function closet(cat, sub) {
+  sidebar(cat, sub);
+  const crumbs = [`<a href="#/">All</a>`];
+  if (cat) crumbs.push(`<a href="#/c/${enc(cat)}">${esc(cat)}</a>`);
+  if (sub) crumbs.push(`<span>${esc(sub)}</span>`);
+  $('#view').innerHTML = `
+    <input class="msearch" id="msearch" type="search" placeholder="Search your wardrobe" value="${esc(S.q)}" autocomplete="off">
+    <div class="chead">
+      <div class="crumb">${crumbs.join(' / ')}${S.brand ? ` / <b>${esc(S.brand)}</b>` : ''} &nbsp;<span class="muted" id="ccount"></span></div>
+      <select class="sort" id="sort">${[['default','Category'],['brand','Designer A–Z'],['most','Most worn'],['least','Least worn'],['stale','Longest unworn'],['new','Recently added']]
+        .map(([v, l]) => `<option value="${v}" ${v === S.sort ? 'selected' : ''}>Sort: ${l}</option>`).join('')}</select>
+    </div>
+    <div class="grid" id="grid"></div>`;
+  $('#sort').onchange = e => { S.sort = e.target.value; renderGrid(cat, sub); };
+  $('#msearch').oninput = e => { S.q = e.target.value; $('#search').value = S.q; renderGrid(cat, sub); };
+  renderGrid(cat, sub);
+}
+function renderGrid(cat, sub) {
+  const list = filtered(cat, sub);
+  const s = S.sort;
+  list.sort(s === 'brand' ? (a, b) => (a.brand || '').localeCompare(b.brand || '', undefined, { sensitivity: 'base' }) || a.order - b.order
+    : s === 'most' ? (a, b) => b.wears - a.wears || a.order - b.order
+    : s === 'least' ? (a, b) => a.wears - b.wears || a.order - b.order
+    : s === 'stale' ? (a, b) => (a.lastWorn || '').localeCompare(b.lastWorn || '') || a.order - b.order
+    : s === 'new' ? (a, b) => (b.created || 0) - (a.created || 0) || b.order - a.order
+    : defaultSorter());
+  $('#ccount').textContent = `${list.length} item${list.length === 1 ? '' : 's'}`;
+  $('#grid').innerHTML = list.length ? list.map(i => card(i)).join('') : `<div class="empty" style="grid-column:1/-1">Nothing here${S.q ? ` for “${esc(S.q)}”` : ''}.</div>`;
+}
+$('#search').oninput = e => {
+  S.q = e.target.value;
+  const p = location.hash.replace(/^#\/?/, '').split('/').filter(Boolean).map(decodeURIComponent);
+  if ((p[0] || 'c') !== 'c') go('#/'); else renderGrid(p[1], p[2]);
+};
+
+/* ---------- product page ---------- */
+function itemPage(id) {
+  const it = item(id);
+  if (!it) { $('#view').innerHTML = `<div class="empty">That piece isn't in your wardrobe. <a class="link ink" href="#/">Back to closet</a></div>`; return; }
+  const outs = S.outfits.filter(o => o.itemIds.includes(id));
+  const wornToday = it.lastWorn === today();
+  $('#view').innerHTML = `
+    <a class="back up" href="#/c/${enc(it.cat)}/${enc(it.sub || '')}">← ${esc(it.cat)}${it.sub ? ' / ' + esc(it.sub) : ''}</a>
+    <div class="pdp">
+      <div class="im">${it.photo ? `<img src="${it.photo}" alt="">` : '<div class="ph-blank" style="aspect-ratio:6/5">No photo</div>'}</div>
+      <div class="info">
+        <div class="brand">${esc(it.brand || '—')}</div>
+        <div class="nm">${label(it)}</div>
+        <div class="rows">
+          <div class="rw"><span>Category</span><span>${esc(it.cat)}${it.sub ? ' / ' + esc(it.sub) : ''}</span></div>
+          ${it.size ? `<div class="rw"><span>Size</span><span>${esc(it.size)}</span></div>` : ''}
+          ${it.qty > 1 ? `<div class="rw"><span>Quantity</span><span>${it.qty}</span></div>` : ''}
+          <div class="rw"><span>Times worn</span><span>${it.wears}</span></div>
+          <div class="rw"><span>Last worn</span><span>${ago(it.lastWorn)}</span></div>
+        </div>
+        ${it.notes ? `<p class="notes">${esc(it.notes)}</p>` : ''}
+        <div class="stack">
+          <button class="btn" id="wear">${wornToday ? 'Worn today ✓ — tap to undo' : 'I wore this today'}</button>
+          <button class="btn alt" id="toOutfit">Build an outfit with this</button>
+        </div>
+        ${outs.length ? `<div style="margin-top:26px"><div class="up">In ${outs.length} outfit${outs.length > 1 ? 's' : ''}</div>
+          ${outs.map(o => `<a href="#/outfit/${o.id}" style="display:block;margin-top:8px;text-decoration:underline">${esc(o.name)}</a>`).join('')}</div>` : ''}
+        <div style="display:flex;gap:22px;margin-top:28px">
+          <a class="link ink" href="#/edit/${it.id}">Edit</a>
+          <button class="link" id="del">Remove from wardrobe</button>
+        </div>
+      </div>
+    </div>`;
+  $('#wear').onclick = async () => {
+    if (wornToday) { it.wears = Math.max(0, it.wears - 1); it.lastWorn = it.prevWorn || null; it.prevWorn = null; toast('Undone'); }
+    else { it.prevWorn = it.lastWorn; it.wears++; it.lastWorn = today(); toast('Logged for today'); }
+    await saveItem(it); itemPage(id);
+  };
+  $('#toOutfit').onclick = () => { S.preset = [id]; go('#/outfit-new'); };
+  $('#del').onclick = async () => {
+    if (!confirm(`Remove ${it.brand} ${it.name} from your wardrobe?`)) return;
+    if (it.custom) { await DB.del('items', id); S.items = S.items.filter(x => x.id !== id); }
+    else await saveItem({ ...it, deleted: true });
+    for (const o of S.outfits.filter(o => o.itemIds.includes(id))) { o.itemIds = o.itemIds.filter(x => x !== id); await DB.put('outfits', o); }
+    toast('Removed'); go(`#/c/${enc(it.cat)}`);
+  };
+}
+
+/* ---------- add / edit ---------- */
+function editPage(id) {
+  const ex = id ? item(id) : null;
+  if (id && !ex) { go('#/'); return; }
+  const f = ex ? { ...ex } : { id: uid(), brand: '', name: '', size: '', qty: 1, cat: 'Tops', sub: '', notes: '', photo: null, wears: 0, lastWorn: null, created: Date.now(), order: 1e6 + Date.now(), custom: true };
+  const t = tree();
+  $('#view').innerHTML = `
+    <a class="back up" href="${ex ? '#/item/' + ex.id : '#/'}">← ${ex ? 'Back' : 'Closet'}</a>
+    <div class="form">
+      <h1>${ex ? 'Edit piece' : 'Add a piece'}</h1>
+      <div class="fld"><label class="photo" id="photo"><input type="file" accept="image/*" id="file" hidden>
+        ${f.photo ? `<img src="${f.photo}" alt=""><span class="chg up">Change photo</span>` : `<span class="hint">+ Add photo</span>`}</label></div>
+      <div class="fld"><label for="fb">Designer</label><input class="inp" id="fb" value="${esc(f.brand)}" placeholder="e.g. Our Legacy" list="brandlist" autocomplete="off">
+        <datalist id="brandlist">${[...new Set(S.items.map(i => i.brand))].sort().map(b => `<option value="${esc(b)}">`).join('')}</datalist></div>
+      <div class="fld"><label for="fn">Name</label><input class="inp" id="fn" value="${esc(f.name)}" placeholder="e.g. Box Shirt"></div>
+      <div class="two">
+        <div class="fld"><label for="fc">Category</label><select class="inp" id="fc">${[...t.keys()].map(c => `<option ${c === f.cat ? 'selected' : ''}>${esc(c)}</option>`).join('')}</select></div>
+        <div class="fld"><label for="fs">Subcategory</label><input class="inp" id="fs" value="${esc(f.sub)}" list="sublist" placeholder="Pick or type new" autocomplete="off"><datalist id="sublist"></datalist></div>
+      </div>
+      <div class="two">
+        <div class="fld"><label for="fz">Size</label><input class="inp" id="fz" value="${esc(f.size)}" placeholder="e.g. 36, XL, 12"></div>
+        <div class="fld"><label for="fq">Quantity</label><input class="inp" id="fq" type="number" min="1" value="${f.qty || 1}"></div>
+      </div>
+      <div class="fld"><label for="fo">Notes</label><textarea class="inp" id="fo" placeholder="Fit, where it's from, care…">${esc(f.notes)}</textarea></div>
+      <button class="btn" id="save">${ex ? 'Save changes' : 'Add to wardrobe'}</button>
+    </div>`;
+  const subs = () => { $('#sublist').innerHTML = (t.get($('#fc').value) || []).map(s => `<option value="${esc(s)}">`).join(''); };
+  subs(); $('#fc').onchange = subs;
+  $('#file').onchange = async e => {
+    const file = e.target.files[0]; if (!file) return;
+    try { f.photo = await resizeImage(file); $('#photo').querySelectorAll('img,.hint,.chg').forEach(n => n.remove());
+      $('#photo').insertAdjacentHTML('beforeend', `<img src="${f.photo}" alt=""><span class="chg up">Change photo</span>`); }
+    catch (err) { toast(err.message); }
+  };
+  $('#save').onclick = async () => {
+    Object.assign(f, { brand: $('#fb').value.trim(), name: $('#fn').value.trim(), cat: $('#fc').value, sub: $('#fs').value.trim(), size: $('#fz').value.trim(), qty: Math.max(1, parseInt($('#fq').value) || 1), notes: $('#fo').value.trim() });
+    if (!f.brand && !f.name) { toast('Add a designer or a name'); return; }
+    try { await saveItem(f); } catch { toast('Could not save — storage may be full'); return; }
+    toast(ex ? 'Saved' : 'Added'); go('#/item/' + f.id);
+  };
+}
+
+/* ---------- outfits ---------- */
+function collage(ids) {
+  const its = ids.map(item).filter(Boolean).slice(0, 4);
+  if (!its.length) return `<div class="collage n1"><i></i></div>`;
+  return `<div class="collage n${its.length}">${its.map(i => i.photo ? `<img src="${i.photo}" alt="" loading="lazy">` : '<i></i>').join('')}</div>`;
+}
+function outfitsPage() {
+  const list = [...S.outfits].sort((a, b) => b.created - a.created);
+  $('#view').innerHTML = `
+    <div class="bar"><div class="crumb">Outfits &nbsp;<span class="muted">${list.length}</span></div>
+      <div class="acts"><a class="link ink" href="#/shuffle">Shuffle a look</a><a class="link ink" href="#/outfit-new">New outfit</a></div></div>
+    ${list.length ? `<div class="grid">${list.map(o => `<a class="card" href="#/outfit/${o.id}"><div class="im">${collage(o.itemIds)}</div>
+      <div class="b">${esc(o.name)}</div><div class="mt">${o.itemIds.length} piece${o.itemIds.length === 1 ? '' : 's'}${o.wears ? ` · Worn ${o.wears}×` : ''}</div></a>`).join('')}</div>`
+    : `<div class="empty">No outfits yet. <a class="link ink" href="#/outfit-new">Build one</a> or <a class="link ink" href="#/shuffle">shuffle a look</a>.</div>`}`;
+}
+function outfitPage(id) {
+  const o = S.outfits.find(x => x.id === id);
+  if (!o) { go('#/outfits'); return; }
+  const its = o.itemIds.map(item).filter(Boolean);
+  const wornToday = o.lastWorn === today();
+  $('#view').innerHTML = `
+    <a class="back up" href="#/outfits">← Outfits</a>
+    <div class="bar"><div><div class="crumb"><b>${esc(o.name)}</b></div><div class="muted" style="margin-top:4px">${its.length} pieces · Worn ${o.wears}× · Last worn ${ago(o.lastWorn).toLowerCase()}</div></div>
+      <div class="acts"><a class="link ink" href="#/outfit-edit/${o.id}">Edit</a><button class="link" id="del">Delete</button></div></div>
+    <div style="max-width:380px;margin-bottom:34px"><button class="btn" id="wear" ${wornToday ? 'disabled' : ''}>${wornToday ? 'Worn today ✓' : 'I wore this today'}</button></div>
+    <div class="grid">${its.map(i => card(i)).join('')}</div>`;
+  $('#wear').onclick = async () => {
+    o.wears++; o.lastWorn = today(); await DB.put('outfits', o);
+    for (const i of its) if (i.lastWorn !== today()) { i.prevWorn = i.lastWorn; i.wears++; i.lastWorn = today(); await saveItem(i); }
+    toast('Logged for today'); outfitPage(id);
+  };
+  $('#del').onclick = async () => {
+    if (!confirm('Delete this outfit? The pieces stay in your wardrobe.')) return;
+    await DB.del('outfits', id); S.outfits = S.outfits.filter(x => x.id !== id); toast('Outfit deleted'); go('#/outfits');
+  };
+}
+function outfitEditor(id) {
+  const ex = id ? S.outfits.find(x => x.id === id) : null;
+  const f = ex ? { ...ex, itemIds: [...ex.itemIds] } : { id: uid(), name: '', itemIds: S.preset ? [...S.preset] : [], wears: 0, lastWorn: null, created: Date.now() };
+  S.preset = null;
+  const cats = ['All', ...[...tree().keys()].filter(c => S.items.some(i => i.cat === c))];
+  let cat = S.pickCat = 'All';
+  $('#view').innerHTML = `
+    <a class="back up" href="${ex ? '#/outfit/' + ex.id : '#/outfits'}">← ${ex ? 'Back' : 'Outfits'}</a>
+    <div class="form" style="max-width:420px"><h1>${ex ? 'Edit outfit' : 'New outfit'}</h1>
+      <div class="fld"><label for="on">Name</label><input class="inp" id="on" value="${esc(f.name)}" placeholder="e.g. Office, Tuesday"></div></div>
+    <div class="up" style="margin-bottom:4px">Pick pieces</div>
+    <div class="chips" id="ochips">${cats.map(c => `<button class="${c === cat ? 'on' : ''}" data-c="${esc(c)}">${esc(c)}</button>`).join('')}<button data-c="__sel">Selected</button></div>
+    <div class="pick" id="opick"></div>
+    <div class="savebar"><span class="up" id="ocount"></span><button class="btn" id="osave">${ex ? 'Save outfit' : 'Create outfit'}</button></div>`;
+  const draw = () => {
+    const list = S.items.filter(i => cat === 'All' || (cat === '__sel' ? f.itemIds.includes(i.id) : i.cat === cat)).sort(defaultSorter());
+    $('#opick').innerHTML = list.map(i => card(i, `<span class="tick">${f.itemIds.includes(i.id) ? '✓' : ''}</span>`).replace('class="card"', `class="card${f.itemIds.includes(i.id) ? ' sel' : ''}"`)).join('')
+      || '<div class="empty" style="grid-column:1/-1">Nothing selected yet.</div>';
+    $('#ocount').textContent = `${f.itemIds.length} selected`;
+  };
+  draw();
+  $('#ochips').onclick = e => { const b = e.target.closest('[data-c]'); if (!b) return; cat = b.dataset.c; $('#ochips').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); draw(); };
+  $('#opick').onclick = e => {
+    const c = e.target.closest('.card'); if (!c) return; e.preventDefault();
+    const k = f.itemIds.indexOf(c.dataset.id);
+    k >= 0 ? f.itemIds.splice(k, 1) : f.itemIds.push(c.dataset.id);
+    c.classList.toggle('sel', k < 0); c.querySelector('.tick').textContent = k < 0 ? '✓' : '';
+    $('#ocount').textContent = `${f.itemIds.length} selected`;
+  };
+  $('#osave').onclick = async () => {
+    if (!f.itemIds.length) { toast('Pick at least one piece'); return; }
+    f.name = $('#on').value.trim() || 'Untitled look';
+    await DB.put('outfits', f);
+    const k = S.outfits.findIndex(x => x.id === f.id); k >= 0 ? S.outfits[k] = f : S.outfits.push(f);
+    toast(ex ? 'Saved' : 'Outfit created'); go('#/outfit/' + f.id);
+  };
+}
+function season() { const m = new Date().getMonth(); return m < 2 || m === 11 ? 'winter' : m < 5 ? 'spring' : m < 8 ? 'summer' : 'fall'; }
+function rollLook() {
+  const pick = (cat, subs) => { const pool = S.items.filter(i => i.cat === cat && (!subs || subs.includes(i.sub))); return pool.length ? pool[Math.floor(Math.random() * pool.length)] : null; };
+  const cold = ['fall', 'winter'].includes(season());
+  const look = [pick('Tops'), pick('Bottoms'), pick('Footwear')];
+  if (cold || Math.random() < .3) look.push(pick('Outerwear'));
+  if (Math.random() < .5) look.push(pick('Accessories', ['Hats']));
+  if (Math.random() < .4) look.push(pick('Accessories', ['Watches']));
+  return [...new Set(look.filter(Boolean).map(i => i.id))];
+}
+function shufflePage() {
+  S.shuffle = rollLook();
+  $('#view').innerHTML = `
+    <a class="back up" href="#/outfits">← Outfits</a>
+    <div class="bar"><div class="crumb">A look for ${season()}</div>
+      <div class="acts"><button class="link ink" id="again">Shuffle again</button><button class="link ink" id="keep">Save as outfit</button></div></div>
+    <div class="grid">${S.shuffle.map(id => card(item(id))).join('') || '<div class="empty" style="grid-column:1/-1">Add some tops, bottoms and shoes first.</div>'}</div>`;
+  $('#again').onclick = shufflePage;
+  $('#keep').onclick = () => { S.preset = S.shuffle; go('#/outfit-new'); };
+}
+
+/* ---------- more ---------- */
+async function morePage() {
+  const local = await DB.all('items');
+  let usage = '';
+  try { const e = await navigator.storage?.estimate?.(); if (e?.usage) usage = ` Using about ${(e.usage / 1048576).toFixed(1)} MB on this device.`; } catch {}
+  if (S.last !== 'more') return;
+  const never = S.items.filter(i => !i.wears).length;
+  const counts = {}; S.items.forEach(i => counts[i.brand] = (counts[i.brand] || 0) + 1);
+  const topBrand = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
+  $('#view').innerHTML = `
+    <div class="ptitle">Backup &amp; settings</div>
+    <div class="stats">
+      <div><b>${S.items.length}</b><span>Pieces</span></div>
+      <div><b>${never}</b><span>Never worn</span></div>
+      <div><b>${topBrand ? esc(topBrand[0]) : '—'}</b><span>Top designer${topBrand ? ` · ${topBrand[1]}` : ''}</span></div>
+    </div>
+    <div class="panel"><h3>Back up your changes</h3>
+      <p>Your wardrobe photos come from the website. Anything you change here — pieces you add, edits, wear tracking and outfits — is saved on this device only.${usage} Download a backup now and then, or to move to a new phone.</p>
+      <button class="btn" id="exp">Download backup</button><label class="btn alt">Restore backup<input type="file" accept=".json,application/json" id="imp" hidden></label>
+    </div>
+    <div class="panel"><h3>Add to your home screen</h3>
+      <p>iPhone: open this page in Safari, tap Share, then “Add to Home Screen.” Android: browser menu → “Add to Home screen.”</p></div>
+    <div class="panel"><h3>Reset</h3>
+      <p>Clears ${local.length} change${local.length === 1 ? '' : 's'} and ${S.outfits.length} outfit${S.outfits.length === 1 ? '' : 's'} on this device and goes back to the original wardrobe.</p>
+      <button class="btn alt" id="wipe">Reset everything</button></div>`;
+  $('#exp').onclick = async () => {
+    const data = { app: 'wardrobe', version: 2, exported: new Date().toISOString(), items: await DB.all('items'), outfits: await DB.all('outfits') };
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(data)], { type: 'application/json' }));
+    a.download = `wardrobe-backup-${today()}.json`; document.body.appendChild(a); a.click(); a.remove();
+  };
+  $('#imp').onchange = async e => {
+    const file = e.target.files[0]; if (!file) return;
+    try {
+      const d = JSON.parse(await file.text()); if (!Array.isArray(d.items)) throw 0;
+      if (!confirm(`Restore this backup? It replaces the changes and outfits on this device.`)) return;
+      await DB.clear('items'); await DB.clear('outfits');
+      for (const i of d.items) await DB.put('items', i);
+      for (const o of d.outfits || []) await DB.put('outfits', o);
+      await load(); toast('Backup restored'); morePage();
+    } catch { toast("That isn't a wardrobe backup"); }
+  };
+  $('#wipe').onclick = async () => {
+    if (!confirm('Reset everything on this device? Added pieces, edits, wear history and outfits will be erased.')) return;
+    await DB.clear('items'); await DB.clear('outfits'); await load(); toast('Reset'); morePage();
+  };
+}
+
+(async () => {
+  try { await DB.open(); navigator.storage?.persist?.().catch(() => {}); await load(); }
+  catch { S.items = [...BASE.values()]; toast('Storage is off — changes won’t be saved'); DB.put = DB.del = DB.clear = async () => {}; DB.all = async () => []; }
+  route();
+})();
+</script>
+</body>
+</html>
