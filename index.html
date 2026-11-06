@@ -298,6 +298,14 @@ function route() {
 }
 window.addEventListener('hashchange', route);
 $('#menuBtn').onclick = () => document.body.classList.add('drawer');
+document.querySelector('.logo').onclick = e => {
+  e.preventDefault();
+  Object.assign(S, { brand: null, q: '', sort: 'default', scroll: 0, preset: null, shuffle: null });
+  $('#search').value = '';
+  document.body.classList.remove('drawer');
+  if (location.hash && location.hash !== '#/') location.hash = '#/'; else { S.last = ''; route(); }
+  window.scrollTo(0, 0);
+};
 $('#scrim').onclick = () => document.body.classList.remove('drawer');
 
 /* ---------- closet ---------- */
