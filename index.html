@@ -141,6 +141,7 @@
   .stats b{display:block;font-size:26px;font-weight:400;line-height:1.05}
   .stats span{font-size:12px;color:var(--muted)}
 
+  body:not(.owner) .own{display:none!important}
   .toast{position:fixed;left:50%;bottom:calc(28px + env(safe-area-inset-bottom));transform:translate(-50%,8px);background:var(--ink);color:#fff;padding:11px 18px;font-size:12px;opacity:0;transition:.2s;z-index:80;pointer-events:none;white-space:nowrap}
   .toast.show{opacity:1;transform:translate(-50%,0)}
   .scrim{position:fixed;inset:0;background:rgba(0,0,0,.25);z-index:39;opacity:0;pointer-events:none;transition:opacity .2s}
@@ -176,8 +177,8 @@
   <a class="logo" href="#/" aria-label="Wardrobe home"><img src="logo.svg?v=2" alt="Wardrobe"></a>
   <div class="hr">
     <input id="search" type="search" placeholder="Search" autocomplete="off">
-    <a href="#/add" data-nav="add">Add</a>
-    <a href="#/more" data-nav="more">More</a>
+    <a href="#/add" data-nav="add" class="own">Add</a>
+    <a href="#/more" data-nav="more" class="own">More</a>
   </div>
 </header>
 <div class="shell" id="shell"><aside id="side"></aside><main id="view"></main></div>
@@ -284,6 +285,7 @@ function route() {
   $('#shell').classList.toggle('full', v !== 'c');
   if (v === 'c') { closet(p[1], p[2]); window.scrollTo(0, from === 'item' ? S.scroll : 0); return; }
   window.scrollTo(0, 0);
+  if (!S.owner && ['add','edit','outfit-new','outfit-edit','more'].includes(v)) { go('#/'); return; }
   if (v === 'item') itemPage(p[1]);
   else if (v === 'add') editPage();
   else if (v === 'edit') editPage(p[1]);
@@ -333,7 +335,7 @@ function sidebar(cat, sub) {
       <div id="brands">${brands.map(b => `<a href="javascript:void 0" data-brand="${esc(b)}" class="${b === S.brand ? 'on' : ''}">${esc(b)}</a>`).join('') || '<span class="muted">None</span>'}</div>
     </div>
     <div class="grp" style="border-top:1px solid var(--line);padding-top:16px">
-      <a href="#/outfits">Outfits</a><a href="#/add">Add a piece</a><a href="#/more">Backup &amp; settings</a>
+      <a href="#/outfits">Outfits</a><a href="#/add" class="own">Add a piece</a><a href="#/more" class="own">Backup &amp; settings</a>
     </div>`;
   $('#brands').onclick = e => {
     const a = e.target.closest('[data-brand]'); if (!a) return; e.preventDefault();
@@ -402,13 +404,13 @@ function itemPage(id) {
           <div class="rw"><span>Last worn</span><span>${ago(it.lastWorn)}</span></div>
         </div>
         ${it.notes ? `<p class="notes">${esc(it.notes)}</p>` : ''}
-        <div class="stack">
+        <div class="stack own">
           <button class="btn" id="wear">${wornToday ? 'Worn today ✓ — tap to undo' : 'I wore this today'}</button>
           <button class="btn alt" id="toOutfit">Build an outfit with this</button>
         </div>
         ${outs.length ? `<div style="margin-top:26px"><div class="up">In ${outs.length} outfit${outs.length > 1 ? 's' : ''}</div>
           ${outs.map(o => `<a href="#/outfit/${o.id}" style="display:block;margin-top:8px;text-decoration:underline">${esc(o.name)}</a>`).join('')}</div>` : ''}
-        <div style="display:flex;gap:22px;margin-top:28px">
+        <div class="own" style="display:flex;gap:22px;margin-top:28px">
           <a class="link ink" href="#/edit/${it.id}">Edit</a>
           <button class="link" id="del">Remove from wardrobe</button>
         </div>
@@ -484,7 +486,7 @@ function outfitsPage() {
   const list = [...S.outfits].sort((a, b) => b.created - a.created);
   $('#view').innerHTML = `
     <div class="bar"><div class="crumb">Outfits &nbsp;<span class="muted">${list.length}</span></div>
-      <div class="acts"><a class="link ink" href="#/shuffle">Shuffle a look</a><a class="link ink" href="#/outfit-new">New outfit</a></div></div>
+      <div class="acts"><a class="link ink" href="#/shuffle">Shuffle a look</a><a class="link ink own" href="#/outfit-new">New outfit</a></div></div>
     ${list.length ? `<div class="grid">${list.map(o => `<a class="card" href="#/outfit/${o.id}"><div class="im">${collage(o.itemIds)}</div>
       <div class="b">${esc(o.name)}</div><div class="mt">${o.itemIds.length} piece${o.itemIds.length === 1 ? '' : 's'}${o.wears ? ` · Worn ${o.wears}×` : ''}</div></a>`).join('')}</div>`
     : `<div class="empty">No outfits yet. <a class="link ink" href="#/outfit-new">Build one</a> or <a class="link ink" href="#/shuffle">shuffle a look</a>.</div>`}`;
@@ -497,8 +499,8 @@ function outfitPage(id) {
   $('#view').innerHTML = `
     <a class="back up" href="#/outfits">← Outfits</a>
     <div class="bar"><div><div class="crumb"><b>${esc(o.name)}</b></div><div class="muted" style="margin-top:4px">${its.length} pieces · Worn ${o.wears}× · Last worn ${ago(o.lastWorn).toLowerCase()}</div></div>
-      <div class="acts"><a class="link ink" href="#/outfit-edit/${o.id}">Edit</a><button class="link" id="del">Delete</button></div></div>
-    <div style="max-width:380px;margin-bottom:34px"><button class="btn" id="wear" ${wornToday ? 'disabled' : ''}>${wornToday ? 'Worn today ✓' : 'I wore this today'}</button></div>
+      <div class="acts own"><a class="link ink" href="#/outfit-edit/${o.id}">Edit</a><button class="link" id="del">Delete</button></div></div>
+    <div class="own" style="max-width:380px;margin-bottom:34px"><button class="btn" id="wear" ${wornToday ? 'disabled' : ''}>${wornToday ? 'Worn today ✓' : 'I wore this today'}</button></div>
     <div class="grid">${its.map(i => card(i)).join('')}</div>`;
   $('#wear').onclick = async () => {
     o.wears++; o.lastWorn = today(); await DB.put('outfits', o);
@@ -562,7 +564,7 @@ function shufflePage() {
   $('#view').innerHTML = `
     <a class="back up" href="#/outfits">← Outfits</a>
     <div class="bar"><div class="crumb">A look for ${season()}</div>
-      <div class="acts"><button class="link ink" id="again">Shuffle again</button><button class="link ink" id="keep">Save as outfit</button></div></div>
+      <div class="acts"><button class="link ink" id="again">Shuffle again</button><button class="link ink own" id="keep">Save as outfit</button></div></div>
     <div class="grid">${S.shuffle.map(id => card(item(id))).join('') || '<div class="empty" style="grid-column:1/-1">Add some tops, bottoms and shoes first.</div>'}</div>`;
   $('#again').onclick = shufflePage;
   $('#keep').onclick = () => { S.preset = S.shuffle; go('#/outfit-new'); };
@@ -590,6 +592,9 @@ async function morePage() {
     </div>
     <div class="panel"><h3>Add to your home screen</h3>
       <p>iPhone: open this page in Safari, tap Share, then “Add to Home Screen.” Android: browser menu → “Add to Home screen.”</p></div>
+    <div class="panel"><h3>Editing on this device</h3>
+      <p>Editing is unlocked here. Other visitors only see a read-only wardrobe.</p>
+      <button class="btn alt" id="lock">Lock this device</button></div>
     <div class="panel"><h3>Reset</h3>
       <p>Clears ${local.length} change${local.length === 1 ? '' : 's'} and ${S.outfits.length} outfit${S.outfits.length === 1 ? '' : 's'} on this device and goes back to the original wardrobe.</p>
       <button class="btn alt" id="wipe">Reset everything</button></div>`;
@@ -609,13 +614,32 @@ async function morePage() {
       await load(); toast('Backup restored'); morePage();
     } catch { toast("That isn't a wardrobe backup"); }
   };
+  $('#lock').onclick = () => { if (!confirm('Hide editing on this device? Open your unlock link again to get it back.')) return; localStorage.removeItem('wardrobe-owner'); S.owner = false; document.body.classList.remove('owner'); go('#/'); };
   $('#wipe').onclick = async () => {
     if (!confirm('Reset everything on this device? Added pieces, edits, wear history and outfits will be erased.')) return;
     await DB.clear('items'); await DB.clear('outfits'); await load(); toast('Reset'); morePage();
   };
 }
 
+const OWNER_HASH = 'f1d1b8961e2b394ff1d47d9497317df56d2c48fd924ccac5c2c63f2f7d16ef69';
+async function checkOwner() {
+  try {
+    const u = new URL(location.href), k = u.searchParams.get('owner');
+    if (k !== null) {
+      if (k === 'off') localStorage.removeItem('wardrobe-owner');
+      else {
+        const d = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(k));
+        const hex = [...new Uint8Array(d)].map(b => b.toString(16).padStart(2, '0')).join('');
+        if (hex === OWNER_HASH) localStorage.setItem('wardrobe-owner', OWNER_HASH);
+      }
+      u.searchParams.delete('owner'); history.replaceState(null, '', u.pathname + u.search + u.hash);
+    }
+    S.owner = localStorage.getItem('wardrobe-owner') === OWNER_HASH;
+  } catch { S.owner = false; }
+  document.body.classList.toggle('owner', S.owner);
+}
 (async () => {
+  await checkOwner();
   try { await DB.open(); navigator.storage?.persist?.().catch(() => {}); await load(); }
   catch { S.items = [...BASE.values()]; toast('Storage is off — changes won’t be saved'); DB.put = DB.del = DB.clear = async () => {}; DB.all = async () => []; }
   route();
