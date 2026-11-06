@@ -268,7 +268,7 @@ const label = it => esc(it.name || it.sub || it.cat);
 function card(it, extra = '') {
   const meta = [it.size && `Size ${esc(it.size)}`, it.qty > 1 && `×${it.qty}`, it.wears ? `Worn ${it.wears}×` : null].filter(Boolean).join(' · ');
   return `<a class="card" href="#/item/${it.id}" data-id="${it.id}"><div class="im">${img(it)}${extra}</div>
-    <div class="b">${esc(it.brand || '—')}</div><div class="nm">${label(it)}</div>${it.price != null ? `<div class="pr">${money(it.price)}</div>` : ''}${meta ? `<div class="mt">${meta}</div>` : ''}</a>`;
+    <div class="b">${esc(it.brand || '—')}</div><div class="nm">${label(it)}</div>${meta ? `<div class="mt">${meta}</div>` : ''}</a>`;
 }
 
 /* ---------- router ---------- */
@@ -363,7 +363,7 @@ function renderGrid(cat, sub) {
     : s === 'stale' ? (a, b) => (a.lastWorn || '').localeCompare(b.lastWorn || '') || a.order - b.order
     : s === 'new' ? (a, b) => (b.created || 0) - (a.created || 0) || b.order - a.order
     : defaultSorter());
-  $('#ccount').textContent = `${list.length} item${list.length === 1 ? '' : 's'} · ${money(worth(list))}`;
+  $('#ccount').textContent = `${list.length} item${list.length === 1 ? '' : 's'}`;
   $('#grid').innerHTML = list.length ? list.map(i => card(i)).join('') : `<div class="empty" style="grid-column:1/-1">Nothing here${S.q ? ` for “${esc(S.q)}”` : ''}.</div>`;
 }
 $('#search').oninput = e => {
@@ -488,7 +488,7 @@ function outfitPage(id) {
   const wornToday = o.lastWorn === today();
   $('#view').innerHTML = `
     <a class="back up" href="#/outfits">← Outfits</a>
-    <div class="bar"><div><div class="crumb"><b>${esc(o.name)}</b></div><div class="muted" style="margin-top:4px">${its.length} pieces · ${money(worth(its))} · Worn ${o.wears}× · Last worn ${ago(o.lastWorn).toLowerCase()}</div></div>
+    <div class="bar"><div><div class="crumb"><b>${esc(o.name)}</b></div><div class="muted" style="margin-top:4px">${its.length} pieces · Worn ${o.wears}× · Last worn ${ago(o.lastWorn).toLowerCase()}</div></div>
       <div class="acts"><a class="link ink" href="#/outfit-edit/${o.id}">Edit</a><button class="link" id="del">Delete</button></div></div>
     <div style="max-width:380px;margin-bottom:34px"><button class="btn" id="wear" ${wornToday ? 'disabled' : ''}>${wornToday ? 'Worn today ✓' : 'I wore this today'}</button></div>
     <div class="grid">${its.map(i => card(i)).join('')}</div>`;
@@ -573,7 +573,6 @@ async function morePage() {
     <div class="ptitle">Backup &amp; settings</div>
     <div class="stats">
       <div><b>${S.items.length}</b><span>Pieces</span></div>
-      <div><b>${money(worth(S.items))}</b><span>Retail value</span></div>
       <div><b>${never}</b><span>Never worn</span></div>
       <div><b>${topBrand ? esc(topBrand[0]) : '—'}</b><span>Top designer${topBrand ? ` · ${topBrand[1]}` : ''}</span></div>
     </div>
